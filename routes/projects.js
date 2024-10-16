@@ -27,11 +27,12 @@ router.get("/", async (req, res, next) => {
  */
 router.get("/:id", async (req, res, next) => {
   try {
-    const projects = await Project.findById(req.params.id);
-    if (projects) {
-      res.json({ projects });
+    const project = await Project.findById(req.params.id);
+
+    if (project) {
+      res.json({ project });
     } else {
-      res.json({ message: `No projects found with id: ${req.params.id}` });
+      res.json({ message: `No project found with id: ${req.params.id}` });
     }
   } catch (error) {
     next(error);
@@ -65,7 +66,7 @@ router.delete("/:id", async (req, res, next) => {
   try {
     const deletedProject = await Project.findByIdAndDelete(req.params.id);
 
-    if (deletedProjected) {
+    if (deletedProject) {
       res.json({
         message: `Project deleted: ${req.params.id}`,
         deletedProject,
@@ -108,25 +109,24 @@ router.post("/:id/tasks", async (req, res, next) => {
     //find the project to add a new task
     const project = await Project.findById(req.params.id);
     if (!project) {
-      res.json({ message: `project not found: ${req.params.id}` });
+      res.status(404).json({ message: `project not found: ${req.params.id}` });
       return;
     }
     //create a new task
     const task = await Task.create(req.body);
 
     //Check if task was created
-    if(task){
-         //add the task to the tasks array of the project
-    project.tasks.push(task);
+    if (task) {
+      //add the task to the tasks array of the project
+      project.tasks.push(task);
 
-    //save the project
-    await project.save();
+      //save the project
+      await project.save();
 
-    res.status(201).json({ project });
-    }else{
-        res.status(400).json({ message: "Error creating task"})
+      res.status(201).json({ project });
+    } else {
+      res.status(400).json({ message: "Error creating task" });
     }
-   
   } catch (error) {
     next(error);
   }
